@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    flipper-activerecord (0.1.0)
+    flipper-activerecord (0.1.1)
       activerecord (>= 4.2.0.beta2)
       flipper (~> 0.6.0)
 
