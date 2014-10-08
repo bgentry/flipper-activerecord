@@ -24,7 +24,7 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        Flipper::ActiveRecord::Feature.create!(name: feature.name.to_s)
+        Flipper::ActiveRecord::Feature.find_or_create_by!(name: feature.name.to_s)
         true
       end
 
@@ -75,8 +75,33 @@ module Flipper
       #
       # Returns true.
       def enable(feature, gate, thing)
-        f = Flipper::ActiveRecord::Feature.eager_load(:gates).find_or_create_by(name: feature.key.to_s)
-        f.gates.find_or_create_by!(name: gate.key.to_s, value: thing.value.to_s)
+        case gate.data_type
+        when :boolean, :integer
+          g = Flipper::ActiveRecord::Gate.joins(:feature).
+            where(flipper_features: {name: feature.key}).
+            find_or_initialize_by({
+              name: gate.key.to_s,
+            })
+          g.value = thing.value.to_s
+          unless g.persisted?
+            g.feature = Flipper::ActiveRecord::Feature.select(:id).find_or_create_by!(name: feature.key)
+          end
+          g.save!
+        when :set
+          g = Flipper::ActiveRecord::Gate.joins(:feature).
+            where(flipper_features: {name: feature.key}).
+            find_or_initialize_by({
+              name:  gate.key.to_s,
+              value: thing.value.to_s,
+            })
+          unless g.persisted?
+            g.feature = Flipper::ActiveRecord::Feature.select(:id).find_or_create_by!(name: feature.key)
+          end
+          g.save!
+        else
+          unsupported_data_type gate.data_type
+        end
+
         true
       end
 
@@ -88,18 +113,16 @@ module Flipper
       #
       # Returns true.
       def disable(feature, gate, thing)
-        conditions = { flipper_features: {name: feature.key} }
+        scope = Flipper::ActiveRecord::Gate.joins(:feature).where(flipper_features: {name: feature.key})
 
         g = case gate.data_type
         when :boolean
-          Flipper::ActiveRecord::Gate.joins(:feature).where(conditions).destroy_all
+          scope.destroy_all
         when :integer
-          conditions.merge!(name: gate.key.to_s)
-          Flipper::ActiveRecord::Gate.joins(:feature).where(conditions).
-            limit(1).update_all(value: thing.value.to_s)
+          scope.where(name: gate.key.to_s).limit(1).
+            update_all(value: thing.value.to_s)
         when :set
-          conditions.merge!(name: gate.key.to_s, value: thing.value.to_s)
-          Flipper::ActiveRecord::Gate.joins(:feature).where(conditions).destroy_all
+          scope.where(name: gate.key.to_s, value: thing.value.to_s).destroy_all
         else
           unsupported_data_type gate.data_type
         end
