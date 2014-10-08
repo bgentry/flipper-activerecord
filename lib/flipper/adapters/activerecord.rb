@@ -44,7 +44,7 @@ module Flipper
       # Returns a Hash of Flipper::Gate#key => value.
       def get(feature)
         result = {}
-        f = Flipper::ActiveRecord::Feature.find_by(name: feature.key)
+        f = Flipper::ActiveRecord::Feature.eager_load(:gates).find_by(name: feature.key)
 
         feature.gates.each do |gate|
           result[gate.key] = case gate.data_type
@@ -75,23 +75,9 @@ module Flipper
       #
       # Returns true.
       def enable(feature, gate, thing)
-        f = Flipper::ActiveRecord::Feature.find_or_create_by(name: feature.key.to_s)
+        f = Flipper::ActiveRecord::Feature.eager_load(:gates).find_or_create_by(name: feature.key.to_s)
         f.gates.find_or_create_by!(name: gate.key.to_s, value: thing.value.to_s)
         true
-#         case gate.data_type
-#         when :boolean, :integer
-#           update feature.key, '$set' => {
-#             gate.key.to_s => thing.value.to_s,
-#           }
-#         when :set
-#           update feature.key, '$addToSet' => {
-#             gate.key.to_s => thing.value.to_s,
-#           }
-#         else
-#           unsupported_data_type gate.data_type
-#         end
-# 
-#         true
       end
 
       # Public: Disables a gate for a given thing.
