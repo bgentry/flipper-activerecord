@@ -13,8 +13,7 @@ module Flipper
       # Public: The name of the adapter.
       attr_reader :name
 
-      def initialize(collection)
-        @collection = collection
+      def initialize
         @name = :activerecord
       end
 
@@ -127,26 +126,6 @@ module Flipper
         raise "#{data_type} is not supported by this adapter"
       end
 
-      # Private
-      def find(key)
-        @collection.find_one(criteria(key)) || {}
-      end
-
-      # Private
-      def update(key, updates)
-        options = {:upsert => true}
-        @collection.update criteria(key), updates, options
-      end
-
-      # Private
-      def delete(key)
-        @collection.remove criteria(key)
-      end
-
-      # Private
-      def criteria(key)
-        {:_id => key.to_s}
-      end
     end
   end
 end

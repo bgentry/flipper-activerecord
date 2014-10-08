@@ -12,7 +12,7 @@ config = YAML.load(File.read("spec/database.yml"))
 ActiveRecord::Base.establish_connection config["postgresql"]
 ActiveRecord::Migration.verbose = true
 
-require 'generators/flipper-activerecord/templates/migration'
+require 'generators/flipper/templates/migration'
 ActiveRecord::Schema.define do
   CreateFlipperTables.up
 
