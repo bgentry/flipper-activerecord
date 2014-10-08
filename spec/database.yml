@@ -1,0 +1,3 @@
+postgresql:
+  adapter: postgresql
+  database: flipper_activerecord_test
