@@ -110,7 +110,7 @@ module Flipper
       #
       # Returns true.
       def disable(feature, gate, thing)
-        scope = Flipper::ActiveRecord::Gate.joins(:feature).where(flipper_features: {name: feature.key})
+        scope = gate_join(feature)
 
         g = case gate.data_type
         when :boolean
@@ -136,7 +136,7 @@ module Flipper
       
       # Private
       def gate_join( feature )
-        Flipper::ActiveRecord::Gate.joins(:feature).where( flipper_features: {name: feature.key} )
+        Flipper::ActiveRecord::Gate.joins(:feature).where( flipper_features: {name: feature.key} ).readonly(false)
       end
 
       # Private
