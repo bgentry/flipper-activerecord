@@ -24,7 +24,9 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        Flipper::ActiveRecord::Feature.find_or_create_by!(name: feature.name.to_s)
+        opts = { name: feature.name.to_s }
+        Flipper::ActiveRecord::Feature.where(opts).first ||
+          Flipper::ActiveRecord::Feature.create!(opts)
         true
       end
 
@@ -77,25 +79,20 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          g = Flipper::ActiveRecord::Gate.joins(:feature).
-            where(flipper_features: {name: feature.key}).
-            find_or_initialize_by({
-              name: gate.key.to_s,
-            })
+          g = gate_join( feature )
+          opts = { name: gate.key.to_s }
+          g = g.where(opts).first || g.new(opts)
           g.value = thing.value.to_s
           unless g.persisted?
-            g.feature = Flipper::ActiveRecord::Feature.select(:id).find_or_create_by!(name: feature.key)
+            g.feature = feature_id( feature )
           end
           g.save!
         when :set
-          g = Flipper::ActiveRecord::Gate.joins(:feature).
-            where(flipper_features: {name: feature.key}).
-            find_or_initialize_by({
-              name:  gate.key.to_s,
-              value: thing.value.to_s,
-            })
+          g = gate_join( feature )
+          opts = { name:  gate.key.to_s, value: thing.value.to_s }
+          g = g.where(opts).first || g.new!(opts)
           unless g.persisted?
-            g.feature = Flipper::ActiveRecord::Feature.select(:id).find_or_create_by!(name: feature.key)
+            g.feature = feature_id( feature )
           end
           g.save!
         else
@@ -128,6 +125,18 @@ module Flipper
         end
 
         true
+      end
+      
+      # Private
+      def feature_id( feature )
+        opts = { name: feature.key }
+        i = Flipper::ActiveRecord::Feature.select(:id)
+        i.where(opts).first || i.create!(opts)
+      end
+      
+      # Private
+      def gate_join( feature )
+        Flipper::ActiveRecord::Gate.joins(:feature).where( flipper_features: {name: feature.key} )
       end
 
       # Private
