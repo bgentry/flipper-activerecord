@@ -46,7 +46,7 @@ module Flipper
       # Returns a Hash of Flipper::Gate#key => value.
       def get(feature)
         result = {}
-        f = Flipper::ActiveRecord::Feature.eager_load(:gates).where(name: feature.key)
+        f = Flipper::ActiveRecord::Feature.eager_load(:gates).where(name: feature.key).first
 
         feature.gates.each do |gate|
           result[gate.key] = case gate.data_type
