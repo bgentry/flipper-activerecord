@@ -3,8 +3,9 @@
 An [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord) adapter for [Flipper](https://github.com/jnunemaker/flipper).
 
 Currently, this targets Rails 4.2 because it uses real foreign keys via
-`add_foreign_key` and `remove_foreign_key`. These can probably easily be added
-with SQL instead, which would make this compatible with more Rails versions.
+`add_foreign_key` and `remove_foreign_key`. You can backport those commands
+using the [Foreigner](https://github.com/matthuhiggins/foreigner) gem to
+drive compatibility with other rails versions.
 
 ## Installation
 
