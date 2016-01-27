@@ -16,5 +16,5 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
 
   gem.add_dependency 'flipper', '~> 0.6'
-  gem.add_dependency 'activerecord', '>= 4.2.0.beta2'
+  gem.add_dependency 'activerecord', '~> 4.2'
 end
