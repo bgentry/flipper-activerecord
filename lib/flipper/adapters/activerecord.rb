@@ -30,12 +30,14 @@ module Flipper
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        clear(feature)
+        Flipper::ActiveRecord::Feature.where(name: feature.key).destroy_all
+        true
       end
 
       # Public: Clears all the gate values for a feature.
       def clear(feature)
-        Flipper::ActiveRecord::Feature.where(name: feature.key).destroy_all
+        f = Flipper::ActiveRecord::Feature.find_by(name: feature.key)
+        f.gates.destroy_all if f
         true
       end
 
