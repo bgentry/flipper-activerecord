@@ -2,6 +2,12 @@
 
 An [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord) adapter for [Flipper](https://github.com/jnunemaker/flipper).
 
+## Deprecated
+
+The [Flipper](https://github.com/jnunemaker/flipper) project now includes its own ActiveRecord and Sequel adapters. It is recommended that all users migrate to the first-party adapter as I will not be supporting my own version any longer.
+
+## Info
+
 Currently, this targets Rails 4.2 because it uses real foreign keys via
 `add_foreign_key` and `remove_foreign_key`. 
 
